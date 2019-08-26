@@ -1,0 +1,8 @@
+/supervisord/run/
+/supervisord/log/
+pyenv/
+ssh-keys/
+.*.sw?
+*.tar
+.docker_stub
+Makefile.local.vars
