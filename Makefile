@@ -20,6 +20,9 @@ MAKEFILE_VARS = $(wildcard $(PROJECT_ROOT)/Makefile.vars $(PROJECT_ROOT)/Makefil
 # Copy command.
 CP = cp -vf
 
+# Bootstrap files.
+BOOTSTRAP_FILES=$(wildcard resources/bootstrap-*/*)
+
 # Stub file used to determine whether the docker image needs to be updated.
 DOCKER_STUB = $(DOCKER_BOOTSTRAP)/.docker_stub
 

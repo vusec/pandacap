@@ -41,6 +41,6 @@ ENV PATH ${panda_path}/bin:$PATH
 ENV PANDA_PATH ${panda_path}
 WORKDIR "${panda_path}/share/rr"
 
-# Use baseimage-docker's init system.
+# Step 5 - launch baseimage-docker's init
 CMD ["/sbin/my_init"]
 

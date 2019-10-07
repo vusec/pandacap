@@ -1,0 +1,18 @@
+#!/bin/sh
+export LC_ALL=en_US.UTF-8
+if [ "$1" != "" ]; then
+	u="$1"
+else
+	u="{{VM_USER}}"
+fi
+if [ "$2" != "" ]; then
+	p="$2"
+else
+	p="{{VM_SSH_PORT}}"
+fi
+ts=$(date +'%Y%m%d-%H%M%S')
+cd "{{PANDA_PATH}}/share/rr"
+env > "{{ASCIINEMA_CAST_PREFIX}}-$ts".env
+{{ASCIINEMA}} rec "{{ASCIINEMA_CAST_PREFIX}}-$ts".cast \
+	-t "{{ASCIINEMA_TITLE}}" -q \
+	-c "ssh -l $u -p $p localhost"
