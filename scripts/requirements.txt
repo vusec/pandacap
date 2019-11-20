@@ -1,0 +1,2 @@
+PyYAML==5.1.2
+git+https://github.com/m000/j2cli.git@master#egg=j2cli
