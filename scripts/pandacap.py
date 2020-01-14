@@ -22,7 +22,8 @@ PANDA_TARGETS = ('i386', 'x86_64', 'arm', 'ppc')
 
 #: Formats for appending portions to command line.
 CMD_FORMATS = {
-    'panda':            'panda-system-{target}',
+    'panda-bin':        'panda-system-{target}',
+    'panda':            '-panda {panda}',
     'mem':              '-m {mem:d}',
     'disk':             '-hda {disk}',
     'usbdisk':          '-usbdevice disk:format=raw:{usbdisk}',
@@ -32,7 +33,7 @@ CMD_FORMATS = {
     'docker-host':      '{docker_image}-{ts}',
     'docker-init':      '/sbin/my_init -- /sbin/setuser {docker_user}',
     'docker-no-init':   '/sbin/setuser {docker_user}',
-    'docker-opt':       '-i --name {hostname} -h {hostname} -t {docker_image}',
+    'docker-opt':       '-i --name {hostname} -h {hostname} {docker_image}',
     'docker-mnt':       '--mount type={type},src={src},dst={dst}',
     'docker-net':       '--net={docker_net}',
     'docker-fwd':       '-p {haddr}:{from:d}:{to:d}/{proto}',
@@ -129,7 +130,7 @@ def process_common_args(args):
     if 'hostname' not in args:
         args.addattr('hostname', socket.gethostname())
     # add qemu arguments
-    for arg_name in ['mem', 'disk', 'usbdisk', 'nic']:
+    for arg_name in ['mem', 'disk', 'usbdisk', 'nic', 'panda']:
         if getattr(args, arg_name, None) is None:
             continue
         else:
@@ -362,7 +363,9 @@ def qemu_make_usbdisk(contents_dir, out_dir, uid, fstype='ext3', fssize='32M', f
         logging.error("%s filesystems are not supported.", fstype)
         return None
 
-def run(argv=[]):
+def prov2r_parse_args(argv=[]):
+    """ Parses a list of command line arguments.
+    """
     # helper lambdas
     _k2s = lambda d: ', '.join(d.keys())
 
@@ -458,6 +461,7 @@ def run(argv=[]):
         'usbdisk-dir': {'action': 'store', 'type': Path, 'help': 'create a image from this directory and attach it to the VM as a USB disk', 'default': None},
     }
     subparsers = parser.add_subparsers(dest='mode', help='operation mode')
+    subparsers.required = True # required argument added in Python 3.7
     for m, mode_opts in MODES.items():
         mode_opts['parser'] = subparsers.add_parser(m, help=mode_opts['help'],
             description='PANDA wrapper for PROV2R — %s' % mode_opts['help'],
@@ -465,13 +469,20 @@ def run(argv=[]):
         for o in mode_opts['args']:
             mode_opts['parser'].add_argument('--%s' % (o), **MODES_ARGS[o])
 
-    # parse arguments and reset loglevel
+    # parse arguments / reset loglevel / add mode arguments processing function
     args = parser.parse_args(argv)
     logging.getLogger().setLevel(LOGLEVELS[min(args.verbose, len(LOGLEVELS)-1)])
-    logging.debug("Parsed arguments: %s", args)
+    args.addattr('process_mode_args', MODES[args.mode]['process_mode_args'])
 
+    # return
+    logging.debug("Parsed arguments: %s", args)
+    return args
+
+def prov2r_make_command(args):
+    """ Creates a PANDA command using the specified args namespace.
+    """
     # find PANDA binary
-    panda_name = arg_format('panda', args, split=False)
+    panda_name = arg_format('panda-bin', args, split=False)
     if args.docker_image is not None:
         # running in docker - assume that the binary is in the path
         panda_bin = panda_name
@@ -501,24 +512,21 @@ def run(argv=[]):
 
     # create command components
     # the order is important — functions may modify args
-    cmd_mode = MODES[args.mode]['process_mode_args'](args)
+    cmd_mode = args.process_mode_args(args)
     cmd_docker = process_docker_args(args)
     cmd_common = process_common_args(args)
 
-    # create and run command
+    # concatenate command parts and return
     cmd = [*cmd_docker, panda_bin, *cmd_common, *cmd_mode]
     logging.info('Prepared command: %s', cmd)
-    subprocess.call(cmd)
-
+    return cmd
 
 if __name__ == '__main__':
-    run(sys.argv[1:])
+    args = prov2r_parse_args(sys.argv[1:])
+    cmd = prov2r_make_command(args)
+    subprocess.call(cmd)
 
 # ??? do we need this ???
 # export LD_LIBRARY_PATH=$(p_abs "${panda_path}/panda_plugins")
-
-# copy tarball to filesystem using debugfs - no root required
-# debugfs -wR "write $tarball contents.tar.gz" $1
-# }
 
 # vim: set et ts=4 sts=4 sw=4 ai ft=python :#
