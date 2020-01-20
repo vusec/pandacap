@@ -1,3 +1,4 @@
+/bootstrap/run/run.*/
 /supervisord/run/
 /supervisord/log/
 pyenv/
