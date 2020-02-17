@@ -1,0 +1,7 @@
+#!/bin/sh
+export LC_ALL=en_US.UTF-8
+ts=$(date +'%Y%m%d-%H%M%S')
+cd "{{PANDA_PATH}}/share/rr"
+{{ASCIINEMA}} rec "{{ASCIINEMA_CAST_PREFIX}}-$ts".cast \
+	-t "{{ASCIINEMA_TITLE}}" -q \
+	-c "ssh -l {{VM_USER}} -p {{VM_SSH_PORT}} localhost"
