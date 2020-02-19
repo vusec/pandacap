@@ -30,7 +30,7 @@ CMD_FORMATS = {
     'nic':              '{nic}',
     'net-cfg':          '-netdev user,id=unet0,{net_fwd_list}',
     'net-fwd':          'hostfwd={proto}:{haddr}:{to:d}-:{from:d}',
-    'docker-host':      '{docker_image}-{ts}',
+    'docker-host':      '{docker_image}-{docker_host_unique}',
     'docker-init':      '/sbin/my_init -- /sbin/setuser {docker_user}',
     'docker-no-init':   '/sbin/setuser {docker_user}',
     'docker-opt':       '-i --name {hostname} -h {hostname} {docker_image}',
@@ -206,9 +206,15 @@ def process_docker_args(args):
         cmd = ['docker', 'run']
 
     # create hostname
+    if False:
+        # from timestamp
+        docker_host_unique = datetime.now().strftime(CMD_FORMATS['ts-fmt'])
+    else:
+        # from run_id
+        docker_host_unique = args.run_id
     hostname = arg_format('docker-host', split=False,
         docker_image=args.docker_image,
-        ts=datetime.now().strftime(CMD_FORMATS['ts-fmt']))
+        docker_host_unique=docker_host_unique)
     args.addattr('hostname', hostname)
 
     # initialize docker mount info
