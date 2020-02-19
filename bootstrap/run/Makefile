@@ -22,11 +22,19 @@ CP = cp -vf
 
 #####################################################################
 
-# Copies scripts to run directory.
-define copy_scripts
-$(foreach f,$(wildcard scripts/$(1)_*.sh),$(CP) $(f) $(2)/scripts/$(patsubst $(1)_%,%,$(notdir $(f)));)
+# Copies files from list starting with fpref to target, removing rpref.
+# $1->list of files, $2->target, $3->fpref, $4->rpref
+define copy_files
+for s in $(filter $(3)%,$(1)); do \
+	t=$${s##*/$(4)}; \
+	$(CP) "$$s" $(2)/"$$t"; \
+done
 endef
 
+# Regex replace with sed.
+define resub
+$(shell echo "$(1)" | sed "$(2)")
+endef
 #####################################################################
 
 .PHONY: all help clean-run
@@ -41,25 +49,37 @@ all: help
 %.env: %.env.j2 $(MAKEFILE_VARS)
 	$(PYRUN) j2 $(<) -f env $(MAKEFILE_VARS) -o $(@)
 
+%.sh: %.sh.j2 $(MAKEFILE_VARS)
+	$(PYRUN) j2 $(<) -f env $(MAKEFILE_VARS) -o $(@)
+	chmod 755 $(@)
+
 %/id_ed25519:
 	@[ -d $(dir $(@)) ] || mkdir -p $(dir $(@))
-	ssh-keygen -q -t ed25519 -P "" -C "$(*)" -f $(basename $(@))
+	ssh-keygen -q -t ed25519 -P "" -C "$(call resub,$(*),"s/[^0-9]//g")" -f $(basename $(@))
 
-%/docker: bootstrap.sh bootstrap.env %/id_ed25519
-	@[ -d $(@) ] || mkdir -p $(@)/files $(@)/scripts
-	$(CP) bootstrap.sh bootstrap.env $(@)
-	$(CP) $(wildcard $(dir $(@))/id_*) $(@)/files
-	$(call copy_scripts,$(notdir $(@)),$(@))
+%/id_ed25519.pub: %/id_ed25519
+	true
 
-%/vm: bootstrap.sh bootstrap.env %/id_ed25519
+%/docker: bootstrap.sh bootstrap.env %/id_ed25519 %/id_ed25519.pub $(wildcard scripts/docker_*) files/recvmssh.sh
 	@[ -d $(@) ] || mkdir -p $(@)/files $(@)/scripts
-	$(CP) bootstrap.sh bootstrap.env $(@)
-	$(CP) $(wildcard $(dir $(@))/id_*) $(@)/files
-	$(call copy_scripts,$(notdir $(@)),$(@))
+	@$(CP) bootstrap.sh bootstrap.env $(@)
+	@$(call copy_files,$(^),$(@)/scripts,scripts/docker_,docker_)
+	@$(call copy_files,$(^),$(@)/files,files/,)
+	@$(call copy_files,$(^),$(@)/files,$(*)/id_,)
+
+%/vm: bootstrap.sh bootstrap.env %/id_ed25519 %/id_ed25519.pub $(wildcard scripts/vm_*) files/recctrlu.sh
+	@[ -d $(@) ] || mkdir -p $(@)/files $(@)/scripts
+	@$(CP) bootstrap.sh bootstrap.env $(@)
+	@$(call copy_files,$(^),$(@)/scripts,scripts/vm_,vm_)
+	@$(call copy_files,$(^),$(@)/files,files/,)
+	@$(call copy_files,$(^),$(@)/files,$(*)/id_,)
 
 #####################################################################
 
 run.%: run.%/docker run.%/vm	##-	create a new run directory
+	@printf "Created \"%s\".\n" $(@)
+
+%.rund: %/docker %/vm	##-	create a new run directory using absolute path
 	@printf "Created \"%s\".\n" $(@)
 
 clean-run:	##- cleanup generated run directories
