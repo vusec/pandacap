@@ -10,4 +10,7 @@ USERS=(panda root)
 [ "$PAM_TYPE" != "" ] || exit 11
 [[ " ${USERS[@]} " =~ " ${PAM_USER} " ]] || exit 12
 
+# For alternate honeypot mode, we only signal for session start.
+[ ${PAM_TYPE} = "open_session" ] || exit 0
+
 ${RECCTRL} ${PAM_TYPE} ${PAM_USER}_session
