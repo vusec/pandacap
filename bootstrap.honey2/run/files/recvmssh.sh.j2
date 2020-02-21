@@ -1,0 +1,42 @@
+#!/bin/sh
+# environment variables
+export LC_ALL=en_US.UTF-8
+
+# username
+if [ "$1" = "auto" ]; then
+	u="$user"
+elif [ -z "$1" ]; then
+	u="{{VM_USER}}"
+else
+	u="$1"
+fi
+
+# port
+if [ -z "$2" ]; then
+	p="{{VM_SSH_PORT}}"
+else
+	p="$2"
+fi
+
+# dump environment
+ts=$(date +'%Y%m%d-%H%M%S')
+cd "{{PANDA_PATH}}/share/rr"
+env > "{{ASCIINEMA_CAST_PREFIX}}-$ts".env
+
+# no asciinema recording for sftp
+if [ "${SSH_ORIGINAL_COMMAND##*/}" = "sftp-server" ]; then
+	# XXX: no functional solution for this
+	exit 1
+fi
+
+# prepare and run asciinema
+if [ -z "$SSH_ORIGINAL_COMMAND" ]; then
+	cmd="ssh -l $u -p $p localhost"
+	flags="-q --stdin"
+else
+	cmd="ssh -l $u -p $p localhost $SSH_ORIGINAL_COMMAND"
+	flags="-q --stdin --raw"
+fi
+{{ASCIINEMA}} rec $flags "{{ASCIINEMA_CAST_PREFIX}}-$ts".cast \
+	-t "{{ASCIINEMA_TITLE}}" -q \
+	-c "$cmd"
