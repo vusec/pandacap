@@ -28,7 +28,7 @@ DOCKER_BOOTSTRAP_GEN = $(basename $(wildcard files/*.j2))
 DOCKER_BOOTSTRAP_FILES = $(wildcard scripts/* files/*) $(DOCKER_BOOTSTRAP_GEN) bootstrap.sh bootstrap.env
 
 # Targets for all/clean.
-TARGETS = panda.tar bootstrap.tar
+TARGETS = tarballs/panda.tar tarballs/bootstrap.tar
 
 #####################################################################
 
@@ -46,10 +46,12 @@ all: $(TARGETS)
 	$(PYRUN) j2 $(<) -f env $(MAKEFILE_VARS) -o $(@)
 	chmod 755 $(@)
 
-bootstrap.tar: $(DOCKER_BOOTSTRAP_FILES)
-	tar -cvhf $(@) -C $(@D) --exclude '*.j2' $(subst $(@D)/,,$(^))
+tarballs/bootstrap.tar: $(DOCKER_BOOTSTRAP_FILES)
+	mkdir -p $(@D)
+	tar -cvhf $(@) --exclude '*.j2' $(^)
 
-panda.tar: $(PANDA_PATH_CHECK)
+tarballs/panda.tar: $(PANDA_PATH_CHECK)
+	mkdir -p $(@D)
 	tar -cvf $(@) -C $(PANDA_PATH) .
 
 clean:

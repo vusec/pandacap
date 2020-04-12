@@ -30,11 +30,11 @@ RUN apt-get update \
     && rm -rf /tmp/* /var/tmp/*
 
 # Step 2 - bootstrap container
-ADD ${docker_bootstrap}/bootstrap.tar /tmp/bootstrap/
+ADD ${docker_bootstrap}/tarballs/bootstrap.tar /tmp/bootstrap/
 RUN /tmp/bootstrap/bootstrap.sh
 
 # Step 3 - copy PANDA in the container
-ADD ${docker_bootstrap}/panda.tar ${panda_path}
+ADD ${docker_bootstrap}/tarballs/panda.tar ${panda_path}
 
 # Step 4 - set container environment
 ENV PATH ${panda_path}/bin:$PATH

@@ -27,7 +27,7 @@ BOOTSTRAP_FILES=$(wildcard resources/bootstrap-*/*)
 DOCKER_STUB = $(DOCKER_BOOTSTRAP)/.docker_stub
 
 # Files used for docker image bootstrap.
-DOCKER_BOOTSTRAP_FILES=panda.tar bootstrap.tar
+DOCKER_BOOTSTRAP_FILES=$(addprefix $(DOCKER_BOOTSTRAP)/tarballs/,panda.tar bootstrap.tar)
 
 # Directory name to use for runtime bootstrapping of containers when testing.
 CTEST_BOOTSTRAP ?= run.1
@@ -49,16 +49,13 @@ endef
 
 #####################################################################
 
-.PHONY: all help clean-files clean-ssh clean-docker lsaddr lscont lsimg up_docker_bootstrap build
+.PHONY: all help clean-files clean-ssh clean-docker lsaddr lscont lsimg build
 
 .NOTPARALLEL: all
 
-all: up_docker_bootstrap build
+all: build
 
-up_docker_bootstrap:
-	+make -C $(DOCKER_BOOTSTRAP) $(DOCKER_BOOTSTRAP_FILES)
-
-$(DOCKER_STUB): Dockerfile $(addprefix $(DOCKER_BOOTSTRAP)/,$(DOCKER_BOOTSTRAP_FILES)) $(MAKEFILE_VARS)
+$(DOCKER_STUB): Dockerfile $(DOCKER_BOOTSTRAP_FILES) $(MAKEFILE_VARS)
 	@printf "Changed files: %s\n" "$(?)"
 	docker build . -t $(IMAGE_NAME) \
 		--build-arg image_maintainer="$(IMAGE_MAINTAINER)" \

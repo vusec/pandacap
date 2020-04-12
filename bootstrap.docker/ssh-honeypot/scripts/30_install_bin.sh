@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PANDA_BIN_FILES=(recvmssh.sh)
+PANDA_BIN_FILES=()
 panda_bin="$PANDA_PATH/bin"
 
 if [ ! -d "$panda_bin" ]; then
