@@ -7,3 +7,4 @@ ssh-keys/
 *.tar
 .docker_stub
 Makefile.local.vars
+.DS_Store
