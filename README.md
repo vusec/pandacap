@@ -19,9 +19,9 @@ You can read more about PANDAcap in our **EuroSec 2020 paper**:
     In *Proceedings of the 13th European Workshop on Systems Security*,
     [EuroSec '20][eurosec20-www], Heraklion, Greece, April 2020.
     doi: [10.1145/3380786.3391396][eurosec20-doi],
-    preprint: [TBA][eurosec20-preprint]
+    preprint: [vusec.net][eurosec20-preprint]
 
-    <details><summary>bibtex</summary>
+    <details><summary>bibtex (paper)</summary>
 
     ```bibtex
     @inproceedings{pandacap-eurosec20,
@@ -40,11 +40,29 @@ You can read more about PANDAcap in our **EuroSec 2020 paper**:
 
     </details>
 
-You can download the **ssh honeypot dataset** of PANDA traces from
-the EuroSec paper from one of the following links.
+    <details><summary>bibtex (dataset)</summary>
 
-  * EuroSec 2020 ssh honeypot dataset
-  * ssh honeypot – [VM image](docs/eurosec20-vm.md) only:
+    ```bibtex
+    @dataset{pandacap-eurosec20-dataset,
+    author = {Stamatogiannakis, Manolis and Bos, Herbert and Groth, Paul},
+    title = {PANDAcap SSH Honeypot Dataset},
+    year = {2020},
+    month = {April},
+    publisher = {Zenodo},
+    version = {1.0},
+    url = {https://doi.org/10.5281/zenodo.3759652}
+    doi = {10.5281/zenodo.3759652},
+    }
+    ```
+
+    </details>
+
+You can download the **SSH Honeypot Dataset** of PANDA traces described
+in the EuroSec paper from one of the following links:
+
+  * **[PANDAcap SSH Honeypot Dataset](docs/eurosec20-dataset.md)**:
+    [zenodo.org][zenodo-dataset-url], [academictorrents.com][at-dataset-url]
+  * **[PANDAcap SSH Honeypot VM](docs/eurosec20-vm.md)**:
     [academictorrents.com][at-vm-url]
 
 **Note:** Good documentation is hard to do. If a piece of information
@@ -146,14 +164,16 @@ This happens through the use of [j2cli][j2cli] to parse the Makefile
 variables and render them into [Jinja2 templates][jinja2] templates.
 
 [at-vm-url]: https://academictorrents.com/details/39df3904460e909e175434cbd87764b8c487891d
+[at-dataset-url]: https://academictorrents.com/details/4a3eadf47425cb60111ec224de272997294eec93
 [baseimage]: https://github.com/phusion/baseimage-docker
 [docker]: https://www.docker.com/
 [eurosec20-www]: https://www.concordia-h2020.eu/eurosec-2020/
 [eurosec20-doi]: https://doi.org/10.1145/3380786.3391396
-[eurosec20-preprint]: https://www.google.com/
+[eurosec20-preprint]: https://www.vusec.net/publications/#stamatogiannakis-bos-groth-pandacapaframeworkforstreamliningcollectionoffullsystemtraces-2020
 [j2cli]: https://github.com/m000/j2cli
 [jinja2]: https://jinja.palletsprojects.com/
 [panda-dockerfile]: https://github.com/panda-re/panda/blob/master/panda/docker
 [panda]: https://github.com/panda-re/panda/
 [recctrl]: https://github.com/
+[zenodo-dataset-url]: https://zenodo.org/record/3759652
 
