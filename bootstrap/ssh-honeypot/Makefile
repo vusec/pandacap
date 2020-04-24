@@ -60,14 +60,14 @@ all: help
 %/id_ed25519.pub: %/id_ed25519
 	true
 
-%/docker: bootstrap.sh bootstrap.env %/id_ed25519 %/id_ed25519.pub $(wildcard scripts/docker_*) files/recvmssh.sh
+%/docker: bootstrap.sh bootstrap.env %/id_ed25519 %/id_ed25519.pub $(wildcard scripts/docker_*) $(wildcard files/*)
 	@[ -d $(@) ] || mkdir -p $(@)/files $(@)/scripts
 	@$(CP) bootstrap.sh bootstrap.env $(@)
 	@$(call copy_files,$(^),$(@)/scripts,scripts/docker_,docker_)
 	@$(call copy_files,$(^),$(@)/files,files/,)
 	@$(call copy_files,$(^),$(@)/files,$(*)/id_,)
 
-%/vm: bootstrap.sh bootstrap.env %/id_ed25519 %/id_ed25519.pub $(wildcard scripts/vm_*) files/recctrlu.sh
+%/vm: bootstrap.sh bootstrap.env %/id_ed25519 %/id_ed25519.pub $(wildcard scripts/vm_*) $(wildcard files/*)
 	@[ -d $(@) ] || mkdir -p $(@)/files $(@)/scripts
 	@$(CP) bootstrap.sh bootstrap.env $(@)
 	@$(call copy_files,$(^),$(@)/scripts,scripts/vm_,vm_)
