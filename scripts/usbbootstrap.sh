@@ -13,19 +13,24 @@
 
 mkdir /mnt/bootstrap
 if mount -L bootstrap /mnt/bootstrap 2>/dev/null; then
-    # execute bootstrap script
-    /mnt/bootstrap/bootstrap.sh
+    if [ -x "/mnt/bootstrap/bootstrap.sh" ]; then
+        # execute bootstrap script
+        /mnt/bootstrap/bootstrap.sh
 
-    # cleanup after bootstrapping
-    umount /mnt/bootstrap
-    find -L /sys/bus/usb/devices/ -maxdepth 2 -name product | while read f; do
-        if grep -q 'QEMU USB HARDDRIVE' "$f"; then
-           devid=$(echo "$f" | awk -F/ '{print $(NF-1)}')
-           echo "$devid" > /sys/bus/usb/drivers/usb/unbind
-        fi
-    done
-    sed -i "/$(basename "$0")/d" /etc/rc.local
-    rm -f "$0"
+        # cleanup after bootstrapping
+        umount /mnt/bootstrap
+        find -L /sys/bus/usb/devices/ -maxdepth 2 -name product | while read f; do
+            if grep -q 'QEMU USB HARDDRIVE' "$f"; then
+                devid=$(echo "$f" | awk -F/ '{print $(NF-1)}')
+                echo "$devid" > /sys/bus/usb/drivers/usb/unbind
+            fi
+        done
+        sed -i "/$(basename "$0")/d" /etc/rc.local
+        rm -f "$0"
+    else
+        # no bootstrap.sh executable - ignore
+        umount /mnt/bootstrap
+    fi
 fi
 rmdir /mnt/bootstrap
 
